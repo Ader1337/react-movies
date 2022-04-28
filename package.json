@@ -2,7 +2,7 @@
   "name": "movies-proj",
   "version": "0.1.0",
   "private": true,
-  "hovepage": "https://ader1337.github.io/react-movies",
+  "hovepage": "https://Ader1337.github.io/react-movies",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.1.1",
