@@ -1,61 +1,67 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import Preloader from '../components/Preloader';
 import Movies from './../components/Movies';
 import SearchForm from './../components/SearchForm';
 
 
-const API_KEY = process.env.REACT_APP_API_KEY
+let  API_KEY = process.env.REACT_APP_API_KEY
 
-class Main extends React.Component {
-    state = {
-        movies: [
-        ],
-        serchText: '',
-        typeOfMovie: 'all',
-        isLoaded: false,
-        firstComeIn: true,
+
+
+function Main() {
+    const [movies,setMovies] = useState([])
+    const [searchText, setSearchText] = useState('')
+    const [typeOfMovie, setTypeOfMovie] = useState('all')
+    const [isLoaded, setIsLoaded] = useState(false)
+    const [firstComeIn, setFirstComeIn] = useState(true)
+
+
+    const handleInput = (e) => {
+        if (e.target.name === 'serchText')
+            setSearchText(e.target.value)
+        else if (e.target.name === 'typeOfMovie')
+            setTypeOfMovie(e.target.value)
     }
-    getMovies(e) {
+    const getMovies = (e) => {
         e.preventDefault()
 
-        if (this.state.firstComeIn)
-            this.setState({ firstComeIn: false })
+        if (firstComeIn)
+            setFirstComeIn(false)
 
-        this.setState({ isLoaded: false })
+        setIsLoaded(false)
 
-        setTimeout(()=> {
-            let type = this.state.typeOfMovie === 'all' ? '' : '&type=' + this.state.typeOfMovie
+        setTimeout(() => {
+            let type = typeOfMovie === 'all' ? '' : '&type=' + typeOfMovie
 
-            fetch(`https://www.omdbapi.com/?apikey=${API_KEY}&s=${this.state.serchText}${type}`)
-                .then((response) => response.json())
+            fetch(`https://www.omdbapi.com/?apikey=${API_KEY}&s=${searchText}${type}`)
+                .then((response) =>{
+                    return response.json()
+                } )
                 .then((data) => {
-                    this.setState({ movies: data.Search, isLoaded: true, })
-                }) 
-        },100)
+                    setMovies(data.Search)
+                    setIsLoaded(true)
+                }).catch((err)=>{
+                    console.error(err)
+                    setIsLoaded(true)
+                })
+        }, 100)
     }
-    handleInput(e) {
-        this.setState({ [e.target.name]: e.target.value })
-    }
-    componentDidMount() {
-    }
-    render(){
-        const { serchText, movies, typeOfMovie} = this.state
-        return (
-            <div className="main">
-                <div className="container">
-                    <div className="main__inner">
-                        <SearchForm getMovies={this.getMovies.bind(this)} serchText={serchText} handleInput={this.handleInput.bind(this)} typeOfMovie={typeOfMovie} />
-                        {this.state.firstComeIn 
-                            ? <div className='greetingText'>Enter name of <span>series </span>or <span>movie </span>  </div>  
-                            :  <div>
-                                    {this.state.isLoaded ? <Movies movies={movies} /> : <Preloader />}
-                                </div>
-                        }
-                    </div>
+
+    return(
+        <div className="main">
+            <div className="container">
+                <div className="main__inner">
+                    <SearchForm getMovies={getMovies} serchText={searchText} handleInput={handleInput} typeOfMovie={typeOfMovie} />
+                    {firstComeIn
+                        ? <div className='greetingText'>Enter name of <span>series </span>or <span>movie </span>  </div>
+                        : <div>
+                            {isLoaded ? <Movies movies={movies} /> : <Preloader />}
+                        </div>
+                    }
                 </div>
             </div>
-        )
-    }
-    
+        </div>
+    )
 }
+
 export default Main
